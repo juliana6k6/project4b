@@ -37,8 +37,7 @@ class Payments(models.Model):
                                     blank=True, null=True)
     payment_sum = models.FloatField(verbose_name='сумма платежа')
     payment_method = models.CharField(max_length=50, verbose_name='способ оплаты', choices=PAYMENTS_CHOICES)
-    # payment_link = models.URLField(max_length=400, verbose_name='ссылка для оплаты', null=True, blank=True)
-    # payment_id = models.CharField(max_length=255, verbose_name='идентификатор платежа', null=True, blank=True)
+
 
     def __str__(self):
         return f"{self.user}: ({self.paid_course if self.paid_course else self.paid_lesson})"

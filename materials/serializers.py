@@ -2,6 +2,7 @@ from rest_framework import serializers
 
 from materials.models import Course, Lesson
 from rest_framework.fields import SerializerMethodField
+from users.models import Payments
 
 
 class LessonSerializer(serializers.ModelSerializer):
@@ -46,4 +47,5 @@ class CourseDetailSerializer(serializers.ModelSerializer):
     class Meta:
         model = Course
         fields = "__all__"
+
 
