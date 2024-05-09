@@ -40,7 +40,7 @@ class Payments(models.Model):
 
 
     def __str__(self):
-        return f"{self.user}: ({self.paid_course if self.paid_course else self.paid_lesson})"
+        return f"{self.user} ({self.paid_course if self.paid_course else self.paid_lesson})-оплачено {self.payment_sum}"
 
     class Meta:
         verbose_name = "платеж"
