@@ -11,21 +11,27 @@ from users.serializers import UserSerializer, UserDetailSerializer
 
 class UserCreateAPIView(generics.CreateAPIView):
     serializer_class = UserSerializer
+    queryset = User.objects.all()
 
-    def create(self, request, *args, **kwargs):
-        """Переопределение метода для сохранения хешированного пароля в бд (если пароль не хешируется -
-        пользователь не считается активным и токен авторизации не создается)"""
-        serializer = UserSerializer(data=request.data)
-        serializer.is_valid(raise_exception=True)
-        self.perform_create(serializer)
-        headers = self.get_success_headers(serializer.data)
-
-        password = serializer.data["password"]
-        user = User.objects.get(pk=serializer.data["id"])
-        user.set_password(password)
+    def perform_create(self, serializer):
+        user = serializer.save(is_active=True) #сделали пользователя активным
+        user.set_password(user.password) #хешируется пароль
         user.save()
 
-        return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)
+    # def create(self, request, *args, **kwargs):
+    #     """Переопределение метода для сохранения хешированного пароля в бд (если пароль не хешируется -
+    #     пользователь не считается активным и токен авторизации не создается)"""
+    #     serializer = UserSerializer(data=request.data)
+    #     serializer.is_valid(raise_exception=True)
+    #     self.perform_create(serializer)
+    #     headers = self.get_success_headers(serializer.data)
+    #
+    #     password = serializer.data["password"]
+    #     user = User.objects.get(pk=serializer.data["id"])
+    #     user.set_password(password)
+    #     user.save()
+    #
+    #     return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)
 
 
 class UserDetailAPIView(generics.RetrieveAPIView):
