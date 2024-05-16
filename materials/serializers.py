@@ -1,3 +1,4 @@
+from materials.validators import url_validator
 from rest_framework import serializers
 
 from materials.models import Course, Lesson
@@ -6,6 +7,7 @@ from users.models import Payments
 
 
 class LessonSerializer(serializers.ModelSerializer):
+    url = serializers.URLField(validators=[url_validator])
     class Meta:
         model = Lesson
         fields = '__all__'
