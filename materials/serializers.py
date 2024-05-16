@@ -41,10 +41,13 @@ class CourseSerializer(serializers.ModelSerializer):
 class CourseDetailSerializer(serializers.ModelSerializer):
     count_lessons_in_course = SerializerMethodField()
     lesson = LessonSerializer(source='lesson_set', many=True, read_only=True)
+    is_subscribed = SerializerMethodField()
+
 
     @staticmethod
     def get_count_lessons_in_course(course):
         return Lesson.objects.filter(course=course).count()
+
 
     class Meta:
         model = Course
