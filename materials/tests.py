@@ -55,22 +55,18 @@ class LessonTestCase(APITestCase):
     def test_lesson_delete(self):
         """Тестирование удаления урока"""
         url = reverse('materials:lesson-delete', args=(self.lesson.pk,))
-        # self.lesson.owner = self.user
         response = self.client.delete(url)
-        print('\ntest_lesson_delete')
+        print(f"{self.lesson.title} удалён")
         self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
         self.assertEqual(Lesson.objects.all().count(), 0)
+        self.assertFalse(Lesson.objects.filter(id=self.lesson.id).exists())
 
-    #     # """asserts для успешного удаления урока"""
-    #     # self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
-    #     # self.assertFalse(Lesson.objects.filter(id=self.lesson.id).exists())
+        # self.assertFalse(Lesson.objects.filter(id=self.lesson.id).exists())
 
-    def test_lesson_moderator_delete(self):
-          """Проверка на права доступа - создан пользователь с правами
-           модератора (не владелец урока)"""
-        url = reverse('materials:lesson-delete', args=(self.lesson.pk,))
-        # self.lesson.owner = self.user
-        response = self.client.delete(url)
-        print('\ntest_lesson_delete')
-        self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
-        self.assertEqual(Lesson.objects.all().count(), 0)
+    def test_lesson_list(self):
+        url = reverse('materials:lesson-list')
+        response = self.client.get(url)
+        data = response.json
+        print(data)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(Lesson.objects.all().count(), 1)
