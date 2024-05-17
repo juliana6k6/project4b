@@ -20,11 +20,11 @@ class LessonTestCase(APITestCase):
 
     def test_lesson_create(self):
         """Тестирование создания урока"""
-        url = reverse()
+        url = reverse("materials:lesson-create")
         data = {'title': 'Lesson1', 'description': 'Description_test',
                 'course': self.course.id, 'url': 'https://course1.youtube.com/',
                 'owner': self.user.id}
-        response = self.client.post('/lesson/create/', data=data)
+        response = self.client.post(url, data)
 
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
         self.assertTrue(Lesson.objects.filter(name=data['name']).exists())
