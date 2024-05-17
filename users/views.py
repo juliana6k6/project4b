@@ -61,7 +61,7 @@ class UserListAPIView(generics.ListAPIView):
 #     ordering_fields = ('payment_date',)
 
 class SubscriptionView(APIView):
-    """Контроллер управления подпиской пользователя на курс
+    """Класс управления подпиской пользователя на курс
        в запросе передаем id курса и если подписка на данный курс у текущего пользователя
        существует - удаляем, если нет - создаем"""
     serializer_class = SubscriptionSerializer
@@ -73,20 +73,18 @@ class SubscriptionView(APIView):
         # получаем пользователя из self.requests
         course_id = self.request.data.get('course_id')
         # получаем id курса из self.reqests.data
-        queryset = Course.objects.filter(pk=course_id)
+        queryset = Course.objects.filter()
         #получаем список курсов
-        course = get_object_or_404(queryset=queryset)
+        course_item = get_object_or_404(queryset, id=course_id)
         #получаем объект курса из базы с помощью get_object_or_404
-        subs_item = Subscription.objects.filter(course=course, user=user)
-        # объекты подписок по текущему пользователю и курсу
-
+        subs_item = Subscription.objects.filter(course=course_item, user=user)
+        #объекты подписок по текущему пользователю и курсу
         if subs_item.exists():
             subs_item.delete()
             message = 'Подписка удалена'
         # Если подписка у пользователя на этот курс есть - удаляем ее
-
         else:
-            Subscription.objects.create(user=user, course=course)
+            Subscription.objects.create(user=user, course=course_item)
             message = 'Подписка добавлена'
         # Если подписки у пользователя на этот курс нет - создаем ее
         return Response({"message": message})
