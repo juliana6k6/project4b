@@ -1,3 +1,4 @@
+from materials.serializers import CourseSerializer
 from rest_framework import serializers
 from users.models import Payments, User, Subscription
 

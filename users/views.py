@@ -3,6 +3,7 @@ from materials.models import Course
 from rest_framework.filters import OrderingFilter
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import viewsets, generics
+from rest_framework.generics import CreateAPIView
 from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework.response import Response
 from rest_framework.views import APIView
@@ -45,6 +46,7 @@ class UserListAPIView(generics.ListAPIView):
     queryset = User.objects.all()
     permission_classes = [IsAuthenticated]
 
+
 # class UserViewSet(viewsets.ModelViewSet):
 #     serializer_class = UserSerializer
 #     queryset = User.objects.all()
@@ -60,32 +62,28 @@ class UserListAPIView(generics.ListAPIView):
 #     filterset_fields = ('paid_course', 'paid_lesson', 'payment_method')
 #     ordering_fields = ('payment_date',)
 
-class SubscriptionView(APIView):
-    """Класс управления подпиской пользователя на курс
-       в запросе передаем id курса и если подписка на данный курс у текущего пользователя
-       существует - удаляем, если нет - создаем"""
-    serializer_class = SubscriptionSerializer
-    queryset = Subscription.objects.all()
-    permission_classes = [IsAuthenticated]
 
-    def post(self, request, *args, **kwargs):
+class SubscriptionCreateAPIView(CreateAPIView):
+    queryset = Subscription.objects.all()
+    serializer_class = SubscriptionSerializer
+    permission_classes = (IsAuthenticated,)
+
+    def post(self, *args, **kwargs):
         user = self.request.user
         # получаем пользователя из self.requests
-        course_id = self.request.data.get('course_id')
-        # получаем id курса из self.reqests.data
-        queryset = Course.objects.filter()
-        #получаем список курсов
-        course_item = get_object_or_404(queryset, id=course_id)
-        #получаем объект курса из базы с помощью get_object_or_404
-        subs_item = Subscription.objects.filter(course=course_item, user=user)
-        #объекты подписок по текущему пользователю и курсу
+        course_id = self.request.data.get('course')
+        # получаем id курса из self.reqest.data
+        course_item = get_object_or_404(Course, pk=course_id)
+        # получаем объект курса из базы с помощью get_object_or_404
+        subs_item = Subscription.objects.filter(user=user, course=course_item)
+        # объекты подписок по текущему пользователю и курсу
+
         if subs_item.exists():
             subs_item.delete()
             message = 'Подписка удалена'
-        # Если подписка у пользователя на этот курс есть - удаляем ее
+            # Если подписка у пользователя на этот курс есть - удаляем ее
         else:
             Subscription.objects.create(user=user, course=course_item)
             message = 'Подписка добавлена'
-        # Если подписки у пользователя на этот курс нет - создаем ее
+            # Если подписки у пользователя на этот курс нет - создаем ее
         return Response({"message": message})
-        # Возвращаем ответ в API
