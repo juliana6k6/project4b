@@ -1,3 +1,4 @@
+from materials.paginators import CoursePaginator
 from rest_framework import viewsets, generics
 
 from materials.models import Course, Lesson
@@ -13,6 +14,7 @@ class CourseViewSet(viewsets.ModelViewSet):
     # serializer_class = CourseSerializer
     queryset = Course.objects.all()
     serializers_choice = {'retrieve': CourseDetailSerializer}
+    pagination_class = CoursePaginator
 
     def get_serializer_class(self):
         """Определяем сериализатор с учетом запрашиваемого действия
@@ -51,6 +53,7 @@ class LessonCreateAPIView(generics.CreateAPIView):
 class LessonListAPIView(generics.ListAPIView):
     serializer_class = LessonSerializer
     queryset = Lesson.objects.all()
+    pagination_class = CoursePaginator
 
 
 class LessonUpdateAPIView(generics.UpdateAPIView):
