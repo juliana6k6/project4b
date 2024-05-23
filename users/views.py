@@ -10,7 +10,11 @@ from rest_framework.views import APIView
 
 from users.models import User, Payments, Subscription
 
-from users.serializers import UserSerializer, UserDetailSerializer, SubscriptionSerializer
+from users.serializers import (
+    UserSerializer,
+    UserDetailSerializer,
+    SubscriptionSerializer, PaymentSerializer,
+)
 
 
 class UserCreateAPIView(generics.CreateAPIView):
@@ -19,8 +23,8 @@ class UserCreateAPIView(generics.CreateAPIView):
     permission_classes = [AllowAny]
 
     def perform_create(self, serializer):
-        user = serializer.save(is_active=True) #сделали пользователя активным
-        user.set_password(user.password) #хешируется пароль
+        user = serializer.save(is_active=True)  # сделали пользователя активным
+        user.set_password(user.password)  # хешируется пароль
         user.save()
 
 
@@ -71,7 +75,7 @@ class SubscriptionCreateAPIView(CreateAPIView):
     def post(self, *args, **kwargs):
         user = self.request.user
         # получаем пользователя из self.requests
-        course_id = self.request.data.get('course')
+        course_id = self.request.data.get("course")
         # получаем id курса из self.reqest.data
         course_item = get_object_or_404(Course, pk=course_id)
         # получаем объект курса из базы с помощью get_object_or_404
@@ -80,10 +84,27 @@ class SubscriptionCreateAPIView(CreateAPIView):
 
         if subs_item.exists():
             subs_item.delete()
-            message = 'Подписка удалена'
+            message = "Подписка удалена"
             # Если подписка у пользователя на этот курс есть - удаляем ее
         else:
             Subscription.objects.create(user=user, course=course_item)
-            message = 'Подписка добавлена'
+            message = "Подписка добавлена"
             # Если подписки у пользователя на этот курс нет - создаем ее
         return Response({"message": message})
+
+class PaymentsCreateAPIView(generics.CreateAPIView):
+    """Создание платежа"""
+    serializer_class = PaymentSerializer
+    queryset = Payments.objects.all()
+    permission_classes = [IsAuthenticated]
+
+    # def perform_create(self, serializer):
+    #     stripe.api_key = settings.STRIPE_API_KEY
+    #     response = get_session()
+    #     new_payment = serializer.save()
+    #     new_payment.session_id = response['id']
+    #     new_payment.payment_url = response['url']
+    #     new_payment.payment_status = response['payment_status']
+    #     new_payment.payment_amount = response['amount_total']
+    #     new_payment.save()
+    #     return super().perform_create(serializer)

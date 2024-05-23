@@ -2,7 +2,11 @@ from materials.paginators import CoursePaginator
 from rest_framework import viewsets, generics
 
 from materials.models import Course, Lesson
-from materials.serializers import CourseSerializer, LessonSerializer, CourseDetailSerializer
+from materials.serializers import (
+    CourseSerializer,
+    LessonSerializer,
+    CourseDetailSerializer,
+)
 from rest_framework.permissions import IsAuthenticated
 from users.permissions import IsModer, IsOwner
 
@@ -13,13 +17,14 @@ class CourseViewSet(viewsets.ModelViewSet):
     # 2-ой способ
     # serializer_class = CourseSerializer
     queryset = Course.objects.all()
-    serializers_choice = {'retrieve': CourseDetailSerializer}
+    serializers_choice = {"retrieve": CourseDetailSerializer}
     pagination_class = CoursePaginator
 
     def get_serializer_class(self):
         """Определяем сериализатор с учетом запрашиваемого действия
          (self.action = list, retrieve, create, update,delete).
-        Если действие не указано в словарике serializers_choice - используется default_serializer"""
+        Если действие не указано в словарике serializers_choice - используется default_serializer
+        """
         return self.serializers_choice.get(self.action, self.default_serializer)
 
     def perform_create(self, serializer):
@@ -30,12 +35,16 @@ class CourseViewSet(viewsets.ModelViewSet):
 
     def get_permissions(self):
         """Определяем права доступа с учетом запрашиваемого действия"""
-        if self.action == 'create':
+        if self.action == "create":
             self.permission_classes = (~IsModer,)
-        elif self.action in ['retrieve', 'update', 'list']:
-            self.permission_classes = (IsModer | IsOwner,) #модератор или владелец может просмотреть и редактировать
-        elif self.action == 'destroy':
-            self.permission_classes = (~IsModer | IsOwner,) #немодератор или владелец может удалить
+        elif self.action in ["retrieve", "update", "list"]:
+            self.permission_classes = (
+                IsModer | IsOwner,
+            )  # модератор или владелец может просмотреть и редактировать
+        elif self.action == "destroy":
+            self.permission_classes = (
+                ~IsModer | IsOwner,
+            )  # немодератор или владелец может удалить
         return super().get_permissions()
 
 
@@ -66,6 +75,7 @@ class LessonRetrieveAPIView(generics.RetrieveAPIView):
     serializer_class = LessonSerializer
     queryset = Lesson.objects.all()
     permission_classes = (IsAuthenticated, IsModer | IsOwner)
+
 
 class LessonDeleteAPIView(generics.DestroyAPIView):
     queryset = Lesson.objects.all()

@@ -8,13 +8,14 @@ from users.models import Payments
 
 class LessonSerializer(serializers.ModelSerializer):
     url = serializers.URLField(validators=[url_validator])
+
     class Meta:
         model = Lesson
-        fields = '__all__'
+        fields = "__all__"
 
 
 class CourseSerializer(serializers.ModelSerializer):
-    lesson = LessonSerializer(source='lesson_set', many=True, read_only=True)
+    lesson = LessonSerializer(source="lesson_set", many=True, read_only=True)
     count_lessons_in_course = SerializerMethodField()
 
     @staticmethod
@@ -34,16 +35,16 @@ class CourseSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Course
-        fields = '__all__'
+        fields = "__all__"
 
 
 class CourseDetailSerializer(serializers.ModelSerializer):
     count_lessons_in_course = SerializerMethodField()
-    lesson = LessonSerializer(source='lesson_set', many=True, read_only=True)
+    lesson = LessonSerializer(source="lesson_set", many=True, read_only=True)
     is_subscribed = SerializerMethodField()
 
     def get_subscription(self, obj):
-        request = self.context.get('request')
+        request = self.context.get("request")
         user = None
         if request:
             user = request.user
@@ -56,5 +57,3 @@ class CourseDetailSerializer(serializers.ModelSerializer):
     class Meta:
         model = Course
         fields = "__all__"
-
-
