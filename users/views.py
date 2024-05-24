@@ -9,7 +9,7 @@ from rest_framework.generics import CreateAPIView
 from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework.response import Response
 from rest_framework.views import APIView
-from services import create_product, create_price, create_session
+from services import create_product, create_stripe_price, create_stripe_session
 
 from users.models import User, Payments, Subscription
 
@@ -94,21 +94,21 @@ class PaymentsListAPIView(generics.ListAPIView):
     filter_backends = [DjangoFilterBackend, OrderingFilter]
     filterset_fields = ('paid_course', 'paid_lesson', 'payment_method')
     ordering_fields = ('payment_date',)
-    permission_classes = [IsAuthenticated]
+    # permission_classes = [IsAuthenticated]
 
 
 class PaymentsCreateAPIView(generics.CreateAPIView):
     """Создание платежа"""
     serializer_class = PaymentSerializer
     queryset = Payments.objects.all()
-    permission_classes = [IsAuthenticated]
 
     def perform_create(self, serializer):
-        payments = serializer.save(user=self.request.user)
-        product_id = create_product(payments)
-        price_id = create_price(payments, product_id)
-        session_id, payments_link = create_session(price_id)
+        payments = serializer.save()
+        payments.user = self.request.user
+        amount = payments.amount
+        price = create_stripe_price(amount)
+        session_id, payment_link = create_stripe_session(price)
         payments.session_id = session_id
-        payments.payments_link = payments_link
+        payments.payment_link = payment_link
         payments.save()
 
