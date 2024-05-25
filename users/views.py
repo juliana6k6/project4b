@@ -4,12 +4,12 @@ from django.shortcuts import get_object_or_404
 from materials.models import Course
 from rest_framework.filters import OrderingFilter
 from django_filters.rest_framework import DjangoFilterBackend
-from rest_framework import viewsets, generics
+from rest_framework import viewsets, generics, status
 from rest_framework.generics import CreateAPIView
 from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework.response import Response
 from rest_framework.views import APIView
-from services import create_product, create_stripe_price, create_stripe_session
+from services import create_stripe_price, create_stripe_session, create_stripe_product
 
 from users.models import User, Payments, Subscription
 
@@ -59,7 +59,6 @@ class UserListAPIView(generics.ListAPIView):
 #     queryset = User.objects.all()
 
 
-
 class SubscriptionCreateAPIView(CreateAPIView):
     queryset = Subscription.objects.all()
     serializer_class = SubscriptionSerializer
@@ -85,6 +84,7 @@ class SubscriptionCreateAPIView(CreateAPIView):
             # Если подписки у пользователя на этот курс нет - создаем ее
         return Response({"message": message})
 
+
 class PaymentsListAPIView(generics.ListAPIView):
     """Просмотр списка платежей с фильтрацией по курсу, уроку и способу оплаты,
        и с сортировкой по дате(по умолчанию в модели сортировка по убыванию,
@@ -101,14 +101,18 @@ class PaymentsCreateAPIView(generics.CreateAPIView):
     """Создание платежа"""
     serializer_class = PaymentSerializer
     queryset = Payments.objects.all()
+    permission_classes = [AllowAny]
 
     def perform_create(self, serializer):
+        # try:
         payments = serializer.save()
         payments.user = self.request.user
-        amount = payments.amount
-        price = create_stripe_price(amount)
-        session_id, payment_link = create_stripe_session(price)
+        stripe_product_id = create_stripe_product(payments)
+        payments.amount = payments.payment_sum
+        price = create_stripe_price(stripe_product_id=stripe_product_id, amount=payments.amount)
+        session_id, payment_link = create_stripe_session(price=price)
         payments.session_id = session_id
-        payments.payment_link = payment_link
+        payments.link = payment_link
         payments.save()
-
+    # except serializers.ValidationError("Выберите урок или курс для оплаты") as e:
+    #     return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
