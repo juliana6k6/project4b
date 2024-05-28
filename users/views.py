@@ -8,6 +8,7 @@ from rest_framework import viewsets, generics, status
 from rest_framework.generics import CreateAPIView
 from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework.response import Response
+from django.core.exceptions import ValidationError
 from rest_framework.views import APIView
 from services import create_stripe_price, create_stripe_session, create_stripe_product
 
@@ -101,10 +102,9 @@ class PaymentsCreateAPIView(generics.CreateAPIView):
     """Создание платежа"""
     serializer_class = PaymentSerializer
     queryset = Payments.objects.all()
-    permission_classes = [AllowAny]
+    permission_classes = (IsAuthenticated,)
 
     def perform_create(self, serializer):
-        # try:
         payments = serializer.save()
         payments.user = self.request.user
         stripe_product_id = create_stripe_product(payments)
@@ -114,5 +114,4 @@ class PaymentsCreateAPIView(generics.CreateAPIView):
         payments.session_id = session_id
         payments.link = payment_link
         payments.save()
-    # except serializers.ValidationError("Выберите урок или курс для оплаты") as e:
-    #     return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
