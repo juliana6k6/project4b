@@ -183,7 +183,7 @@ CELERY_RESULT_BACKEND = os.getenv('CELERY_BROKER_URL')
 CELERY_BEAT_SCHEDULE = {
     'check_user_activity': {
         'task': 'materials.tasks.check_user_activity',  # Путь к задаче
-        'schedule': timedelta(minutes=2),  # Расписание выполнения задачи (например, каждый день)
+        'schedule': timedelta(weeks=4),  # Расписание выполнения задачи (например, каждый день)
     }
 }
 

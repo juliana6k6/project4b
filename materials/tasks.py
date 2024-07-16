@@ -32,7 +32,7 @@ def check_user_activity():
             # if user.last_login < (timezone.now() - timedelta(minutes=2)):
             #     user.is_active = False
             #     user.save()
-            if datetime.datetime.now(pytz.timezone("Europe/Moscow")) - user.last_login > datetime.timedelta(minutes=2):
+            if datetime.datetime.now(pytz.timezone("Europe/Moscow")) - user.last_login > datetime.timedelta(weeks=4):
                 user.is_active = False
                 user.save()
 
