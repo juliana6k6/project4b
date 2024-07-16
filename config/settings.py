@@ -118,7 +118,7 @@ AUTH_PASSWORD_VALIDATORS = [
 
 LANGUAGE_CODE = "en-us"
 
-TIME_ZONE = "UTC"
+TIME_ZONE = "Europe/Moscow"
 
 USE_I18N = True
 
@@ -171,7 +171,7 @@ CELERY_BROKER_URL = os.getenv('CELERY_BROKER_URL')
 CELERY_RESULT_BACKEND = os.getenv('CELERY_BROKER_URL')
 
 # Часовой пояс для работы Celery
-CELERY_TIMEZONE = TIME_ZONE
+# CELERY_TIMEZONE = TIME_ZONE
 
 # Флаг отслеживания выполнения задач
 # CELERY_TASK_TRACK_STARTED = True
@@ -183,7 +183,7 @@ CELERY_TIMEZONE = TIME_ZONE
 CELERY_BEAT_SCHEDULE = {
     'check_user_activity': {
         'task': 'materials.tasks.check_user_activity',  # Путь к задаче
-        'schedule': timedelta(days=1),  # Расписание выполнения задачи (например, каждый день)
+        'schedule': timedelta(minutes=2),  # Расписание выполнения задачи (например, каждый день)
     }
 }
 

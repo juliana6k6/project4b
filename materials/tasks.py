@@ -1,8 +1,11 @@
 from celery import shared_task
-from config.settings import EMAIL_HOST_USER
+from config.settings import EMAIL_HOST_USER, TIME_ZONE
 from django.core.mail import send_mail
 from users.models import Subscription, User
-from django.utils import timezone
+# from django.utils import timezone
+# from datetime import timedelta
+import pytz
+import datetime
 
 
 @shared_task
@@ -20,17 +23,17 @@ def mail_update_course_info(course_id):
 
 
 @shared_task
-def check_user_activity(user_id):
+def check_user_activity():
     """Функция проверки активности пользователя"""
-    delta_time = timezone.now() - timezone.timedelta(days=30)
-    user = User.objects.get(id=user_id)
-    if user.last_login < delta_time:
-        user.is_active = False
-        user.save()
+    users = User.objects.filter(is_active=True, is_superuser=False,  last_login__isnull=False)
+    if users.exists():
+        for user in users:
+            print("start!")
+            # if user.last_login < (timezone.now() - timedelta(minutes=2)):
+            #     user.is_active = False
+            #     user.save()
+            if datetime.datetime.now(pytz.timezone("Europe/Moscow")) - user.last_login > datetime.timedelta(minutes=2):
+                user.is_active = False
+                user.save()
 
-    # users_list = User.objects.filter(is_active=True, is_superuser=False, last_login__isnull=False)
-    #
-    # for user in users_list:
-    #     if user.last_login < (timezone.now() - timedelta(days=30)):
-    #         user.is_active = False
-    #         user.save()
+
