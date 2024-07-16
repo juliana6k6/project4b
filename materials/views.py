@@ -9,6 +9,7 @@ from materials.serializers import (
 )
 from rest_framework.permissions import IsAuthenticated
 from users.permissions import IsModer, IsOwner
+from materials.tasks import mail_update_course_info
 
 
 class CourseViewSet(viewsets.ModelViewSet):
@@ -32,6 +33,12 @@ class CourseViewSet(viewsets.ModelViewSet):
         course = serializer.save()
         course.owner = self.request.user
         course.save()
+
+    def perform_update(self, serializer):
+        """Отправляем уведомление всем подписанным пользователям"""
+        updated_course = serializer.save()
+        mail_update_course_info.delay(updated_course)
+        updated_course.save()
 
     def get_permissions(self):
         """Определяем права доступа с учетом запрашиваемого действия"""
