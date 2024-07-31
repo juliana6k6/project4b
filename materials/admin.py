@@ -1,3 +1,7 @@
 from django.contrib import admin
+from materials.models import Course
 
-# Register your models here.
+
+@admin.register(Course)
+class CourserAdmin(admin.ModelAdmin):
+    list_display = ("id", "title", "description", "owner")

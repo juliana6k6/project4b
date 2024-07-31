@@ -48,6 +48,7 @@ INSTALLED_APPS = [
     "django_filters",
     "drf_yasg",
     "django_celery_beat",
+    "rest_framework_simplejwt"
 ]
 
 MIDDLEWARE = [
